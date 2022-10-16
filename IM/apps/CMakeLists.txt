@@ -40,8 +40,8 @@ add_custom_target(generate_message ALL
                 VERBATIM
                 )
 
-
-
+set(MYSQL_CONNECTOR_HEADER "/usr/include/mysql-cppconn-8")
+set(MYSQL_CONNECTOR_LIB "/usr/lib/x86_64-linux-gnu/libmysqlcppconn8.so")
 add_executable(app app.cpp ${MESSAGE_SRC})
 target_compile_features(app PRIVATE cxx_std_20)
 
@@ -51,7 +51,8 @@ target_include_directories(app
         # $<INSTALL_INTERFACE:include/message>
         )
 
-target_link_libraries(app PRIVATE ${Protobuf_LIBRARIES})
+include_directories(app ${MYSQL_CONNECTOR_HEADER})
+target_link_libraries(app PRIVATE ${Protobuf_LIBRARIES} ${MYSQL_CONNECTOR_LIB})
 
 
 target_compile_options(app PRIVATE
