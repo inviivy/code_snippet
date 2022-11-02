@@ -2,12 +2,25 @@ SET(LOX_HEADER
     "Token.hpp"
     "TokenType.hpp"
     "Scanner.hpp"
-    "Lox.hpp")
+    "Lox.hpp"
+    "Expr.hpp"
+    "ExprVisitor.hpp"
+    "BinaryExpr.hpp"
+    "UnaryExpr.hpp"
+    "LiteralExpr.hpp"
+    "GroupingExpr.hpp"
+    "Parser.hpp"
+    "TinyVisitor.hpp")
 
 SET(LOX_SOURCE
     "Token.cpp"
     "Scanner.cpp"
-    "Lox.cpp")
+    "Lox.cpp"
+    "BinaryExpr.cpp"
+    "UnaryExpr.cpp"
+    "LiteralExpr.cpp"
+    "GroupingExpr.hpp"
+    "Parser.cpp")
 
 add_executable(app app.cpp ${LOX_SOURCE} ${LOX_HEADER})
 target_compile_features(app PRIVATE cxx_std_20)

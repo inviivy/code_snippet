@@ -9,7 +9,7 @@ class RuntimeError;
 struct Lox {
   static void Report(int line, const std::string &where,
                      const std::string &message);
-  static void Error(int lin, const std::string &message);
+  static void Error(int line, const std::string &message);
   static void Error(Token token, const std::string &message);
   static void ReportRuntimeError(const RuntimeError &error);
 

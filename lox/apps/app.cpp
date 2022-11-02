@@ -1,10 +1,11 @@
+#include "Parser.hpp"
+#include "Scanner.hpp"
+#include "TinyVisitor.hpp"
 #include <fmt/core.h>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <string_view>
-
-#include "Scanner.hpp"
-
 
 void runPrompt() {
   fmt::print("welcome to lox\n");
@@ -15,9 +16,16 @@ void runPrompt() {
       // run code
       Lox::Scanner scan(code);
       auto tokens = scan.scanTokens();
-      for (const auto& token : tokens) {
+      for (const auto &token : tokens) {
         fmt::print("{}\n", token.toString());
       }
+      fmt::print("\n\n\n");
+      Lox::Parser parser(tokens);
+      auto exprs = parser.parse();
+      fmt::print("exprs.size() = {}\n\n", exprs.size());
+      auto visitor = std::make_unique<Lox::TinyVisitor>();
+      auto str = exprs[0]->accept(*visitor);
+      fmt::print("{}\n\n", std::any_cast<std::string>(str));
     } else {
       fmt::print("\n");
       break;
