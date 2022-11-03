@@ -13,48 +13,40 @@ namespace Lox {
 struct TinyVisitor : public ExprVisitor<std::any> {
 
   std::any visitGroupingExpr(const GroupingExpr &expr) override {
-    return fmt::format(
-        "({})", std::any_cast<std::string>(expr.getExpr().accept(*this)));
+    return std::any_cast<double>(expr.getExpr().accept(*this));
   }
 
   std::any visitUnaryExpr(const UnaryExpr &expr) override {
     auto opType = expr.getOp().getType();
-    std::string opStr;
     if (opType == TokenType::Minus) {
-      opStr = "-";
+      return std::any_cast<double>(expr.getRightExpr().accept(*this)) * (-1.0);
     }
-    return fmt::format(
-        "{}{}", opStr,
-        std::any_cast<std::string>(expr.getRightExpr().accept(*this)));
+    return double(0.0);
   }
 
   std::any visitBinaryExpr(const BinaryExpr &expr) override {
     auto opType = expr.getOp().getType();
-    std::string opStr;
+    auto left = expr.getLeftExpr().accept(*this);
+    auto right = expr.getRightExpr().accept(*this);
     switch (opType) {
     case TokenType::Plus:
-      opStr = "+";
-      break;
+      return std::any_cast<double>(left) + std::any_cast<double>(right);
     case TokenType::Minus:
-      opStr = "-";
-      break;
+      return std::any_cast<double>(left) - std::any_cast<double>(right);
     case TokenType::Star:
-      opStr = "*";
-      break;
+      return std::any_cast<double>(left) * std::any_cast<double>(right);
     case TokenType::Slash:
-      opStr = "/";
-      break;
+      if (std::any_cast<double>(right) == 0) {
+        throw std::runtime_error("division 0");
+      }
+      return std::any_cast<double>(left) / std::any_cast<double>(right);
     default:
-      break;
+      return double{};
     };
-    /* 目前只支持+-*\/四个符号 */
-    return fmt::format(
-        "{}{}{}", std::any_cast<std::string>(expr.getLeftExpr().accept(*this)),
-        opStr, std::any_cast<std::string>(expr.getRightExpr().accept(*this)));
   }
 
   std::any visitLiteralExpr(const LiteralExpr &expr) override {
-    return std::to_string(std::any_cast<double>(expr.getLiteral()));
+    return std::any_cast<double>(expr.getLiteral());
   }
 };
 }; // namespace Lox

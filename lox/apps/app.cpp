@@ -16,16 +16,12 @@ void runPrompt() {
       // run code
       Lox::Scanner scan(code);
       auto tokens = scan.scanTokens();
-      for (const auto &token : tokens) {
-        fmt::print("{}\n", token.toString());
-      }
-      fmt::print("\n\n\n");
       Lox::Parser parser(tokens);
       auto exprs = parser.parse();
       if (!exprs.empty()) {
         auto visitor = std::make_unique<Lox::TinyVisitor>();
         auto str = exprs[0]->accept(*visitor);
-        fmt::print("{}\n\n", std::any_cast<std::string>(str));
+        fmt::print("{}\n", std::any_cast<double>(str));
       }
     } else {
       fmt::print("\n");
