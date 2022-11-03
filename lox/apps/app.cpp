@@ -22,10 +22,11 @@ void runPrompt() {
       fmt::print("\n\n\n");
       Lox::Parser parser(tokens);
       auto exprs = parser.parse();
-      fmt::print("exprs.size() = {}\n\n", exprs.size());
-      auto visitor = std::make_unique<Lox::TinyVisitor>();
-      auto str = exprs[0]->accept(*visitor);
-      fmt::print("{}\n\n", std::any_cast<std::string>(str));
+      if (!exprs.empty()) {
+        auto visitor = std::make_unique<Lox::TinyVisitor>();
+        auto str = exprs[0]->accept(*visitor);
+        fmt::print("{}\n\n", std::any_cast<std::string>(str));
+      }
     } else {
       fmt::print("\n");
       break;
