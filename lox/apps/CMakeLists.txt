@@ -19,7 +19,7 @@ SET(LOX_SOURCE
     "BinaryExpr.cpp"
     "UnaryExpr.cpp"
     "LiteralExpr.cpp"
-    "GroupingExpr.hpp"
+    "GroupingExpr.cpp"
     "Parser.cpp")
 
 add_executable(app app.cpp ${LOX_SOURCE} ${LOX_HEADER})

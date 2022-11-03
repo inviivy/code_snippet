@@ -1,5 +1,6 @@
 #include "Parser.hpp"
 #include "BinaryExpr.hpp"
+#include "GroupingExpr.hpp"
 #include "LiteralExpr.hpp"
 #include "Lox.hpp"
 #include "UnaryExpr.hpp"
@@ -84,7 +85,7 @@ std::unique_ptr<Expr> Parser::primary() {
     // 必须有右括号
     if (peek().getType() == TokenType::RightParen) {
       advance();
-      return expr;
+      return std::make_unique<GroupingExpr>(std::move(expr));
     }
     throw error(peek(), "Expect ')' after expression");
   }

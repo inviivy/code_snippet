@@ -6,7 +6,7 @@
 
 namespace Lox {
 struct LiteralExpr : public Expr {
-  LiteralExpr(std::any literal);
+  explicit LiteralExpr(std::any literal);
   std::any accept(ExprVisitor<std::any> &visitor) const override;
 
   const std::any &getLiteral() const { return literal; }
