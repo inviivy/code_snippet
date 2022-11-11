@@ -38,6 +38,8 @@ private:
 
 int main() {
   IoContainer ioc;
+  // should using xml or json configurate?
+  // condition_a -> DerivedA
   ioc.RegisterType<A, DerivedA, int, int>(std::string("condition_A"));
   ioc.RegisterType<A, DerivedB>(std::string("condition_B"));
 
