@@ -1,7 +1,9 @@
 #include "Scanner.hpp"
 #include "Lox.hpp"
-#include <cctype>
+
 #include <fmt/core.h>
+
+#include <cctype>
 
 namespace Lox {
 Scanner::Scanner(std::string source) : source(std::move(source)) {
@@ -34,6 +36,11 @@ char Scanner::advance() {
   return source.at(current - 1);
 }
 
+std::string_view Scanner::advance(size_t n) {
+  current += n;
+  return std::string_view(source.data() + current - n, n);
+}
+
 bool Scanner::match(char expected) {
   if (isAtEnd()) {
     return false;
@@ -50,6 +57,39 @@ char Scanner::peek() const {
     return '\0';
   }
   return source.at(current);
+}
+
+std::string_view Scanner::peekUtf8() const {
+  if (isAtEnd()) {
+    return {};
+  }
+  unsigned char firstByte = source[current];
+  if (firstByte < static_cast<unsigned char>(0x80)) {
+    if (current >= source.size()) {
+      return {};
+    }
+    return std::string_view(source.data() + current, 1);
+  } else if ((firstByte & static_cast<unsigned char>(0xE0)) ==
+             static_cast<unsigned char>(0xC0)) {
+    if (current + 1 >= source.size()) {
+      return {};
+    }
+    return std::string_view(source.data() + current, 2);
+  } else if ((firstByte & static_cast<unsigned char>(0xF0)) ==
+             static_cast<unsigned char>(0xE0)) {
+    if (current + 2 >= source.size()) {
+      return {};
+    }
+    return std::string_view(source.data() + current, 3);
+  } else if ((firstByte & static_cast<unsigned char>(0xF8)) ==
+             static_cast<unsigned char>(0xF0)) {
+    if (current + 3 >= source.size()) {
+      return {};
+    }
+    return std::string_view(source.data() + current, 4);
+  } else {
+    return std::string_view{};
+  }
 }
 
 char Scanner::peekNext() const {
@@ -75,14 +115,20 @@ void Scanner::comment() {
 }
 
 void Scanner::string() {
-  while (peek() != '"' && !isAtEnd()) {
-    if (peek() == '\n') {
+  std::string_view u8str;
+  while (true) {
+    u8str = peekUtf8();
+    if (isAtEnd() || u8str.empty() ||
+        (u8str.size() == 1 && u8str.front() == '"')) {
+      break;
+    }
+    if (u8str.size() == 1 && u8str.front() == '\n') {
       ++line;
     }
-    advance();
+    advance(u8str.size());
   }
 
-  if (isAtEnd()) {
+  if (isAtEnd() || u8str.empty()) {
     Lox::Error(line, "Unterminated string.");
   }
   advance(); // the closing '''
