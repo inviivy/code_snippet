@@ -23,6 +23,7 @@ private:
   void addToken(TokenType type);
 
   void comment();
+  void comment_slash_star();
   void string();
   void number();
   void identifier();

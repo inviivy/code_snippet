@@ -114,6 +114,15 @@ void Scanner::comment() {
   }
 }
 
+void Scanner::comment_slash_star() {
+  while (!isAtEnd() && !(peek() == '*' && peekNext() == '/')) {
+    advance();
+  }
+  // 此时当前字符和下一个字符为*/, skip
+  advance();
+  advance();
+}
+
 void Scanner::string() {
   std::string_view u8str;
   while (true) {
@@ -218,6 +227,8 @@ void Scanner::scanToken() {
   case '/':
     if (match('/')) {
       comment();
+    } else if (match('*')) {
+      comment_slash_star();
     } else {
       addToken(TokenType::Slash);
     }
