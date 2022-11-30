@@ -1,6 +1,6 @@
 # lox
 
-# Syntax
+# Syntax(Calculator)
 
 ```shell
 calculaterProgram → expression
@@ -17,6 +17,20 @@ unary → ( "!" | "-" ) unary | primary
 primary → NUMBER | "(" expression ")"
 
 ```
+
+
+# Syntax(updated)
+```shell
+expression      →   equality
+equality        →   comparison ( ( "!=" | "==" ) comparison ) *
+comparison      →   term ( ( ">" | ">=" | "<" | "<=" ) term ) *
+term            →   factor ( ( "-" | "+" ) factor ) *
+factor          →   unary ( ( "/" | "*" ) unary ) *
+unary           →   ( "!" | "-" ) unary | primary
+primary         →   NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"
+```
+
+
 
 # reference
 + [Crafting Interpreters](http://www.craftinginterpreters.com/)
