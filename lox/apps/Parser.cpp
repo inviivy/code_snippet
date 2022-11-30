@@ -40,9 +40,36 @@ bool Parser::match(TokenType type) {
   return false;
 }
 
-std::unique_ptr<Expr> Parser::expression() { return addition(); }
+std::unique_ptr<Expr> Parser::expression() { return equality(); }
+
+std::unique_ptr<Expr> Parser::equality() {
+  // equality        →   comparison ( ( "!=" | "==" ) comparison ) *
+  auto expr = comparison();
+  while (match(TokenType::BangEqual) || match(TokenType::EqualEqual)) {
+    auto oper = previous();
+    auto right = comparison();
+    expr =
+        std::make_unique<BinaryExpr>(std::move(expr), oper, std::move(right));
+  }
+  return expr;
+}
+
+std::unique_ptr<Expr> Parser::comparison() {
+  // comparison      →   addition ( ( ">" | ">=" | "<" | "<=" ) addition ) *
+  auto expr = addition();
+  while (match(TokenType::Greater) || match(TokenType::GreaterEqual) ||
+         match(TokenType::Less) || match(TokenType::LessEqual)) {
+    auto oper = previous();
+    auto right = addition();
+    expr =
+        std::make_unique<BinaryExpr>(std::move(expr), oper, std::move(right));
+  }
+
+  return expr;
+}
 
 std::unique_ptr<Expr> Parser::addition() {
+  // addition        →   multiplication ( ( "-" | "+" ) multiplication ) *
   auto expr = multiplication();
   while (match(TokenType::Minus) || match(TokenType::Plus)) {
     auto oper = previous();
@@ -54,6 +81,7 @@ std::unique_ptr<Expr> Parser::addition() {
 }
 
 std::unique_ptr<Expr> Parser::multiplication() {
+  // multiplication  →   unary ( ( "/" | "*" ) unary ) *
   auto expr = unary();
   while (match(TokenType::Slash) || match(TokenType::Star)) {
     auto oper = previous();
@@ -61,11 +89,11 @@ std::unique_ptr<Expr> Parser::multiplication() {
     expr =
         std::make_unique<BinaryExpr>(std::move(expr), oper, std::move(right));
   }
-
   return expr;
 }
 
 std::unique_ptr<Expr> Parser::unary() {
+  // unary → ( "!" | "-" ) unary
   if (match(TokenType::Bang) || match(TokenType::Minus)) {
     auto oper = previous();
     auto right = unary();
@@ -76,13 +104,27 @@ std::unique_ptr<Expr> Parser::unary() {
 }
 
 std::unique_ptr<Expr> Parser::primary() {
-  if (match(TokenType::Number)) {
+  // primary         →   NUMBER | STRING | "true" | "false" | "nil" | "("
+  // expression ")"
+  if (match(TokenType::Number) || match(TokenType::String)) {
     return std::make_unique<LiteralExpr>(previous().getLiteral());
+  }
+
+  if (match(TokenType::False)) {
+    return std::make_unique<LiteralExpr>(false);
+  }
+
+  if (match(TokenType::True)) {
+    return std::make_unique<LiteralExpr>(true);
+  }
+
+  if (match(TokenType::Nil)) {
+    return std::make_unique<LiteralExpr>(std::any{});
   }
 
   if (match(TokenType::LeftParen)) {
     auto expr = expression();
-    // 必须有右括号
+    // 必须有右括号, 否则抛出异常
     if (peek().getType() == TokenType::RightParen) {
       advance();
       return std::make_unique<GroupingExpr>(std::move(expr));

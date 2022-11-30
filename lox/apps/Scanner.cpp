@@ -11,7 +11,8 @@ Scanner::Scanner(std::string source) : source(std::move(source)) {
    * @brief 初始化所有的keywords解决fori先匹配for的问题
    * 暂时只有这几个关键字
    * */
-  keywords = {{"and", TokenType::And},
+  keywords = {{"true", TokenType::True},
+              {"false", TokenType::False},
               {"var", TokenType::Var},
               {"nil", TokenType::Nil},
               {"print", TokenType::Print}};

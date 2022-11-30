@@ -23,9 +23,9 @@ primary → NUMBER | "(" expression ")"
 ```shell
 expression      →   equality
 equality        →   comparison ( ( "!=" | "==" ) comparison ) *
-comparison      →   term ( ( ">" | ">=" | "<" | "<=" ) term ) *
-term            →   factor ( ( "-" | "+" ) factor ) *
-factor          →   unary ( ( "/" | "*" ) unary ) *
+comparison      →   addition ( ( ">" | ">=" | "<" | "<=" ) addition ) *
+addition        →   multiplication ( ( "-" | "+" ) multiplication ) *
+multiplication  →   unary ( ( "/" | "*" ) unary ) *
 unary           →   ( "!" | "-" ) unary | primary
 primary         →   NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"
 ```

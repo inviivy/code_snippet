@@ -25,6 +25,8 @@ private:
   static ParseError error(Token token, const char *message);
 
   std::unique_ptr<Expr> expression();
+  std::unique_ptr<Expr> equality();
+  std::unique_ptr<Expr> comparison();
   std::unique_ptr<Expr> addition();
   std::unique_ptr<Expr> multiplication();
   std::unique_ptr<Expr> unary();
