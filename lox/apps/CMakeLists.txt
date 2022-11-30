@@ -10,7 +10,8 @@ SET(LOX_HEADER
     "LiteralExpr.hpp"
     "GroupingExpr.hpp"
     "Parser.hpp"
-    "TinyVisitor.hpp")
+    "TinyVisitor.hpp"
+    "RPNVisitor.hpp")
 
 SET(LOX_SOURCE
     "Token.cpp"

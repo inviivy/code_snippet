@@ -20,12 +20,6 @@ void runPrompt() {
       Lox::Parser parser(tokens);
       auto exprs = parser.parse();
       if (!exprs.empty()) {
-        auto visitor = std::make_unique<Lox::TinyVisitor>();
-        auto str = exprs[0]->accept(*visitor);
-        fmt::print("{}\n", std::any_cast<double>(str));
-      }
-      fmt::print("\n\n");
-      if (!exprs.empty()) {
         auto visitor = std::make_unique<Lox::RPNVisitor>();
         auto str = exprs[0]->accept(*visitor);
         fmt::print("{}\n", std::any_cast<std::string>(str));
