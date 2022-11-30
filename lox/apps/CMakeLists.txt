@@ -11,7 +11,9 @@ SET(LOX_HEADER
     "GroupingExpr.hpp"
     "Parser.hpp"
     "TinyVisitor.hpp"
-    "RPNVisitor.hpp")
+    "RPNVisitor.hpp"
+    "Interpreter.hpp"
+    "RuntimeError.hpp")
 
 SET(LOX_SOURCE
     "Token.cpp"
@@ -21,7 +23,8 @@ SET(LOX_SOURCE
     "UnaryExpr.cpp"
     "LiteralExpr.cpp"
     "GroupingExpr.cpp"
-    "Parser.cpp")
+    "Parser.cpp"
+    "Interpreter.cpp")
 
 add_executable(app app.cpp ${LOX_SOURCE} ${LOX_HEADER})
 target_compile_features(app PRIVATE cxx_std_20)

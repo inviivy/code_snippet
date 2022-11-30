@@ -12,8 +12,8 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-list(APPEND CXX_FLAGS
-            "-fno-rtti")
+#list(APPEND CXX_FLAGS
+#            "-fno-rtti")
 
 list(APPEND SANITIZE_FLAG
             "-fsanitize=address"
