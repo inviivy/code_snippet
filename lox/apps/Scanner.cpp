@@ -118,7 +118,11 @@ void Scanner::comment_slash_star() {
   while (!isAtEnd() && !(peek() == '*' && peekNext() == '/')) {
     advance();
   }
-  // 此时当前字符和下一个字符为*/, skip
+  // 如果为空或者其他字符
+  if (isAtEnd()) {
+    Lox::Error(line, "Unterminated comment.");
+    return;
+  }
   advance();
   advance();
 }
