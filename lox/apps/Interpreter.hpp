@@ -4,6 +4,8 @@
 #include "Token.hpp"
 
 #include <any>
+#include <memory>
+#include <vector>
 
 namespace Lox {
 
@@ -12,9 +14,10 @@ class Expr;
 class Interpreter : public ExprVisitor<std::any> {
 public:
   ~Interpreter();
+  void execute(const Expr&);
   std::any evaluate(const Expr &);
 
-  void interpret();
+  void interpret(std::vector<std::unique_ptr<Expr>>);
 
 private:
   static bool isTruthy(const std::any &);

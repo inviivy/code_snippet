@@ -3,6 +3,7 @@
 #include "Expr.hpp"
 #include "GroupingExpr.hpp"
 #include "LiteralExpr.hpp"
+#include "Lox.hpp"
 #include "RuntimeError.hpp"
 #include "UnaryExpr.hpp"
 
@@ -31,6 +32,19 @@ std::string stringify(const std::any &object) {
 }; // namespace
 
 namespace Lox {
+
+void Interpreter::execute(const Expr &expr) { expr.accept(*this); }
+
+void Interpreter::interpret(std::vector<std::unique_ptr<Expr>> exprs) {
+  try {
+    for (auto &expr : exprs) {
+      execute(*expr);
+    }
+  } catch (RuntimeError error) {
+    Lox::ReportRuntimeError(error);
+  }
+}
+
 bool Interpreter::isTruthy(const std::any &object) {
   if (!object.has_value()) {
     return false;

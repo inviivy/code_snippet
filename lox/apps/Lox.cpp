@@ -1,5 +1,7 @@
 #include "Lox.hpp"
+#include "RuntimeError.hpp"
 #include "Token.hpp"
+
 #include <fmt/core.h>
 #include <fmt/ostream.h>
 #include <iostream>
@@ -26,6 +28,12 @@ void Lox::Error(Token token, const std::string &message) {
            message);
   }
   HadError = true;
+}
+
+void Lox::ReportRuntimeError(const RuntimeError &error) {
+  fmt::print(std::cerr, "[line {}] {}\n", error.getToken().getLine(),
+             error.what());
+  HadRuntimeError = true;
 }
 
 }; // namespace Lox
