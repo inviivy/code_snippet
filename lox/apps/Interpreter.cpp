@@ -35,9 +35,9 @@ namespace Lox {
 
 void Interpreter::execute(const Expr &expr) { expr.accept(*this); }
 
-void Interpreter::interpret(std::vector<std::unique_ptr<Expr>> exprs) {
+void Interpreter::interpret(const std::vector<std::unique_ptr<Expr>>& exprs) {
   try {
-    for (auto &expr : exprs) {
+    for (const auto &expr : exprs) {
       execute(*expr);
     }
   } catch (RuntimeError error) {

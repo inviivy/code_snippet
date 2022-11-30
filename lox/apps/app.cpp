@@ -1,7 +1,9 @@
+#include "Interpreter.hpp"
 #include "Parser.hpp"
 #include "RPNVisitor.hpp"
 #include "Scanner.hpp"
 #include "TinyVisitor.hpp"
+
 #include <fmt/core.h>
 #include <iostream>
 #include <memory>
@@ -19,17 +21,8 @@ void runPrompt() {
       auto tokens = scan.scanTokens();
       Lox::Parser parser(tokens);
       auto exprs = parser.parse();
-      if (!exprs.empty()) {
-        auto visitor = std::make_unique<Lox::TinyVisitor>();
-        auto str = exprs[0]->accept(*visitor);
-        fmt::print("{}\n", std::any_cast<double>(str));
-      }
-      fmt::print("\n\n");
-      if (!exprs.empty()) {
-        auto visitor = std::make_unique<Lox::RPNVisitor>();
-        auto str = exprs[0]->accept(*visitor);
-        fmt::print("{}\n", std::any_cast<std::string>(str));
-      }
+      auto interpret = std::make_unique<Lox::Interpreter>();
+      interpret->interpret(exprs);
     } else {
       fmt::print("\n");
       break;

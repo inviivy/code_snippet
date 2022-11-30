@@ -13,11 +13,11 @@ class Expr;
 
 class Interpreter : public ExprVisitor<std::any> {
 public:
-  ~Interpreter();
-  void execute(const Expr&);
+  ~Interpreter() = default;
+  void execute(const Expr &);
   std::any evaluate(const Expr &);
 
-  void interpret(std::vector<std::unique_ptr<Expr>>);
+  void interpret(const std::vector<std::unique_ptr<Expr>> &);
 
 private:
   static bool isTruthy(const std::any &);
