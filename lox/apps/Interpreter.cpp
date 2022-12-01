@@ -188,6 +188,7 @@ std::any Interpreter::visitLiteralExpr(const LiteralExpr &expr) {
 }
 
 std::any Interpreter::visitExpressionStmt(const ExpressionStatement &stmt) {
+  evaluate(stmt.getExpr());
   return {};
 }
 
