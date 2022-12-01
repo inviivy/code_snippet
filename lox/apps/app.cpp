@@ -1,4 +1,5 @@
 #include "Interpreter.hpp"
+#include "Lox.hpp"
 #include "Parser.hpp"
 #include "RPNVisitor.hpp"
 #include "Scanner.hpp"
@@ -21,6 +22,11 @@ void runPrompt() {
       auto tokens = scan.scanTokens();
       Lox::Parser parser(tokens);
       auto exprs = parser.parse();
+      /* using global variable to handle error */
+      if (Lox::Lox::HadError) {
+        Lox::Lox::HadError = false;
+        continue;
+      }
       auto interpret = std::make_unique<Lox::Interpreter>();
       interpret->interpret(exprs);
     } else {

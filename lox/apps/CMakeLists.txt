@@ -13,7 +13,11 @@ SET(LOX_HEADER
     "TinyVisitor.hpp"
     "RPNVisitor.hpp"
     "Interpreter.hpp"
-    "RuntimeError.hpp")
+    "RuntimeError.hpp"
+    "Statement.hpp"
+    "StatementVisitor.hpp"
+    "ExpressionStatement.hpp"
+    "PrintStatement.hpp")
 
 SET(LOX_SOURCE
     "Token.cpp"
@@ -24,7 +28,9 @@ SET(LOX_SOURCE
     "LiteralExpr.cpp"
     "GroupingExpr.cpp"
     "Parser.cpp"
-    "Interpreter.cpp")
+    "Interpreter.cpp"
+    "ExpressionStatement.cpp"
+    "PrintStatement.cpp")
 
 add_executable(app app.cpp ${LOX_SOURCE} ${LOX_HEADER})
 target_compile_features(app PRIVATE cxx_std_20)

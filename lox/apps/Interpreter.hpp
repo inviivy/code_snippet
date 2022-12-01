@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ExprVisitor.hpp"
+#include "StatementVisitor.hpp"
 #include "Token.hpp"
 
 #include <any>
@@ -9,15 +10,17 @@
 
 namespace Lox {
 
+class Statement;
 class Expr;
 
-class Interpreter : public ExprVisitor<std::any> {
+class Interpreter : public ExprVisitor<std::any>,
+                    public StatementVisitor<std::any> {
 public:
   ~Interpreter() = default;
-  void execute(const Expr &);
+  void execute(const Statement &);
   std::any evaluate(const Expr &);
 
-  void interpret(const std::vector<std::unique_ptr<Expr>> &);
+  void interpret(const std::vector<std::unique_ptr<Statement>> &);
 
 private:
   static bool isTruthy(const std::any &);
@@ -31,5 +34,8 @@ private:
   std::any visitUnaryExpr(const UnaryExpr &) override;
   std::any visitBinaryExpr(const BinaryExpr &) override;
   std::any visitLiteralExpr(const LiteralExpr &) override;
+
+  std::any visitExpressionStmt(const ExpressionStatement &) override;
+  std::any visitPrintStatement(const PrintStatement &) override;
 };
 }; // namespace Lox

@@ -1,20 +1,14 @@
 #include "Parser.hpp"
 #include "BinaryExpr.hpp"
+#include "ExpressionStatement.hpp"
 #include "GroupingExpr.hpp"
 #include "LiteralExpr.hpp"
 #include "Lox.hpp"
+#include "PrintStatement.hpp"
 #include "UnaryExpr.hpp"
 
 namespace Lox {
 Parser::Parser(std::vector<Token> tokens) : tokens(std::move(tokens)) {}
-
-std::vector<std::unique_ptr<Expr>> Parser::parse() {
-  std::vector<std::unique_ptr<Expr>> expressions;
-  while (!isAtEnd()) {
-    expressions.push_back(expression());
-  }
-  return expressions;
-}
 
 bool Parser::isAtEnd() const { return peek().getType() == TokenType::TokenEOF; }
 
@@ -29,6 +23,15 @@ Token Parser::advance() {
   return previous();
 }
 
+Token Parser::expect(TokenType type, const std::string &msg) {
+  if (match(type)) {
+    return advance();
+  }
+  /* 如何处理错误 */
+  Lox::Error(peek(), msg);
+  throw ParseError();
+}
+
 bool Parser::match(TokenType type) {
   if (isAtEnd()) {
     return false;
@@ -38,6 +41,39 @@ bool Parser::match(TokenType type) {
     return true;
   }
   return false;
+}
+
+std::vector<std::unique_ptr<Statement>> Parser::parse() {
+  // program         →   statement* EOF
+  std::vector<std::unique_ptr<Statement>> statements;
+  while (!isAtEnd()) {
+    statements.push_back(statement());
+  }
+  return statements;
+}
+
+std::unique_ptr<Statement> Parser::statement() {
+  // statement       →   exprStmt | printStmt
+  try {
+    if (match(TokenType::Print)) {
+      return printStatement();
+    }
+    return exprStatement();
+  } catch (ParseError error) {
+    return nullptr;
+  }
+}
+
+std::unique_ptr<Statement> Parser::printStatement() {
+  auto expr = expression();
+  expect(TokenType::Semicolon, std::string("Expect ';' after value"));
+  return std::make_unique<PrintStatement>(std::move(expr));
+}
+
+std::unique_ptr<Statement> Parser::exprStatement() {
+  auto expr = expression();
+  expect(TokenType::Semicolon, std::string("Expect ';' after value"));
+  return std::make_unique<ExpressionStatement>(std::move(expr));
 }
 
 std::unique_ptr<Expr> Parser::expression() { return equality(); }

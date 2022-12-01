@@ -1,11 +1,16 @@
 #include "Interpreter.hpp"
 #include "BinaryExpr.hpp"
 #include "Expr.hpp"
+#include "ExpressionStatement.hpp"
 #include "GroupingExpr.hpp"
 #include "LiteralExpr.hpp"
 #include "Lox.hpp"
+#include "PrintStatement.hpp"
 #include "RuntimeError.hpp"
+#include "Statement.hpp"
 #include "UnaryExpr.hpp"
+
+#include <fmt/core.h>
 
 #include <cmath>
 #include <string>
@@ -33,12 +38,15 @@ std::string stringify(const std::any &object) {
 
 namespace Lox {
 
-void Interpreter::execute(const Expr &expr) { expr.accept(*this); }
+void Interpreter::execute(const Statement &expr) { expr.accept(*this); }
 
-void Interpreter::interpret(const std::vector<std::unique_ptr<Expr>> &exprs) {
+void Interpreter::interpret(
+    const std::vector<std::unique_ptr<Statement>> &exprs) {
   try {
     for (const auto &expr : exprs) {
-      execute(*expr);
+      if (expr != nullptr) {
+        execute(*expr);
+      }
     }
   } catch (RuntimeError error) {
     Lox::ReportRuntimeError(error);
@@ -177,6 +185,17 @@ std::any Interpreter::visitBinaryExpr(const BinaryExpr &expr) {
 
 std::any Interpreter::visitLiteralExpr(const LiteralExpr &expr) {
   return expr.getLiteral();
+}
+
+std::any Interpreter::visitExpressionStmt(const ExpressionStatement &stmt) {
+  return {};
+}
+
+std::any Interpreter::visitPrintStatement(const PrintStatement &stmt) {
+  auto value = evaluate(stmt.getExpr());
+  /* 将结果转换为string */
+  fmt::print("{}\n", stringify(value));
+  return {};
 }
 
 }; // namespace Lox
