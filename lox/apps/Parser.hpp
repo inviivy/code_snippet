@@ -18,6 +18,7 @@ private:
   Token previous() const;
   Token advance();
   Token expect(TokenType, const std::string &);
+  void synchronize();
 
   bool match(TokenType type);
 

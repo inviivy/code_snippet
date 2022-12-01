@@ -41,11 +41,11 @@ namespace Lox {
 void Interpreter::execute(const Statement &expr) { expr.accept(*this); }
 
 void Interpreter::interpret(
-    const std::vector<std::unique_ptr<Statement>> &exprs) {
+    const std::vector<std::unique_ptr<Statement>> &stmts) {
   try {
-    for (const auto &expr : exprs) {
-      if (expr != nullptr) {
-        execute(*expr);
+    for (const auto &stmt : stmts) {
+      if (stmt != nullptr) {
+        execute(*stmt);
       }
     }
   } catch (RuntimeError error) {

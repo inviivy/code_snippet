@@ -25,11 +25,27 @@ Token Parser::advance() {
 
 Token Parser::expect(TokenType type, const std::string &msg) {
   if (match(type)) {
-    return advance();
+    return previous();
   }
   /* 如何处理错误 */
   Lox::Error(peek(), msg);
   throw ParseError();
+}
+
+void Parser::synchronize() {
+  advance();
+  while (!isAtEnd()) {
+    if (previous().getType() == TokenType::Semicolon) {
+      return;
+    }
+    switch (peek().getType()) {
+    case TokenType::Print:
+      return;
+    default:
+      break;
+    }
+    advance();
+  }
 }
 
 bool Parser::match(TokenType type) {
@@ -60,6 +76,7 @@ std::unique_ptr<Statement> Parser::statement() {
     }
     return exprStatement();
   } catch (ParseError error) {
+    synchronize();
     return nullptr;
   }
 }
