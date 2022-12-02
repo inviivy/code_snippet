@@ -6,6 +6,7 @@
 #include "Lox.hpp"
 #include "PrintStatement.hpp"
 #include "UnaryExpr.hpp"
+#include "VariableStatement.hpp"
 
 namespace Lox {
 Parser::Parser(std::vector<Token> tokens) : tokens(std::move(tokens)) {}
@@ -63,22 +64,42 @@ std::vector<std::unique_ptr<Statement>> Parser::parse() {
   // program         →   statement* EOF
   std::vector<std::unique_ptr<Statement>> statements;
   while (!isAtEnd()) {
-    statements.push_back(statement());
+    statements.push_back(declaration());
   }
   return statements;
 }
 
-std::unique_ptr<Statement> Parser::statement() {
-  // statement       →   exprStmt | printStmt
+std::unique_ptr<Statement> Parser::declaration() {
   try {
-    if (match(TokenType::Print)) {
-      return printStatement();
+    if (match(TokenType::Var)) {
+      return varDecl();
     }
-    return exprStatement();
+    return statement();
   } catch (ParseError error) {
     synchronize();
     return nullptr;
   }
+}
+
+std::unique_ptr<Statement> Parser::varDecl() {
+  auto varName =
+      expect(TokenType::Identifier, std::string("Expect variable name."));
+  std::unique_ptr<Expr> initializer;
+  if (match(TokenType::Equal)) {
+    initializer = expression();
+  }
+  expect(TokenType::Semicolon, "Expect ';' after variable declaration.");
+  // 返回varStatement
+  return std::make_unique<VariableStatement>(std::move(varName),
+                                             std::move(initializer));
+}
+
+std::unique_ptr<Statement> Parser::statement() {
+  // statement       →   exprStmt | printStmt
+  if (match(TokenType::Print)) {
+    return printStatement();
+  }
+  return exprStatement();
 }
 
 std::unique_ptr<Statement> Parser::printStatement() {

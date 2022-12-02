@@ -28,6 +28,8 @@ private:
 
   static ParseError error(Token token, const char *message);
 
+  std::unique_ptr<Statement> declaration();
+  std::unique_ptr<Statement> varDecl();
   std::unique_ptr<Statement> statement();
   std::unique_ptr<Statement> exprStatement();
   std::unique_ptr<Statement> printStatement();

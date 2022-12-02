@@ -37,5 +37,6 @@ private:
 
   std::any visitExpressionStmt(const ExpressionStatement &) override;
   std::any visitPrintStatement(const PrintStatement &) override;
+  std::any visitVariableStatement(const VariableStatement &) override;
 };
 }; // namespace Lox

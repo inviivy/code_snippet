@@ -9,6 +9,7 @@
 #include "RuntimeError.hpp"
 #include "Statement.hpp"
 #include "UnaryExpr.hpp"
+#include "VariableStatement.hpp"
 
 #include <fmt/core.h>
 
@@ -196,6 +197,15 @@ std::any Interpreter::visitPrintStatement(const PrintStatement &stmt) {
   auto value = evaluate(stmt.getExpr());
   /* 将结果转换为string */
   fmt::print("{}\n", stringify(value));
+  return {};
+}
+
+std::any Interpreter::visitVariableStatement(const VariableStatement &stmt) {
+  std::any val;
+  if (const auto &initializer = stmt.getInitializer(); initializer != nullptr) {
+    val = evaluate(*initializer);
+  }
+  /* update to environment */
   return {};
 }
 
