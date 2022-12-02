@@ -9,6 +9,7 @@
 #include "RuntimeError.hpp"
 #include "Statement.hpp"
 #include "UnaryExpr.hpp"
+#include "VariableExpr.hpp"
 #include "VariableStatement.hpp"
 
 #include <fmt/core.h>
@@ -186,6 +187,11 @@ std::any Interpreter::visitBinaryExpr(const BinaryExpr &expr) {
 
 std::any Interpreter::visitLiteralExpr(const LiteralExpr &expr) {
   return expr.getLiteral();
+}
+
+std::any Interpreter::visitVariableExpr(const VariableExpr &expr) {
+  /* todo: how to handle with variable? */
+  return {};
 }
 
 std::any Interpreter::visitExpressionStmt(const ExpressionStatement &stmt) {

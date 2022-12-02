@@ -196,6 +196,10 @@ std::unique_ptr<Expr> Parser::primary() {
     return std::make_unique<LiteralExpr>(std::any{});
   }
 
+  if (match(TokenType::Identifier)) {
+    /**/
+  }
+
   if (match(TokenType::LeftParen)) {
     auto expr = expression();
     // 必须有右括号, 否则抛出异常

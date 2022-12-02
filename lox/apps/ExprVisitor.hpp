@@ -5,6 +5,7 @@ class GroupingExpr;
 class UnaryExpr;
 class BinaryExpr;
 class LiteralExpr;
+class VariableExpr;
 
 template <typename R> struct ExprVisitor {
   ~ExprVisitor() = default;
@@ -12,5 +13,6 @@ template <typename R> struct ExprVisitor {
   virtual R visitUnaryExpr(const UnaryExpr &expr) = 0;
   virtual R visitBinaryExpr(const BinaryExpr &expr) = 0;
   virtual R visitLiteralExpr(const LiteralExpr &expr) = 0;
+  virtual R visitVariableExpr(const VariableExpr &expr) = 0;
 };
 }; // namespace Lox
