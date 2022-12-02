@@ -5,8 +5,15 @@
 
 namespace Lox {
 struct Token {
+  Token();
   Token(TokenType type, std::string lexeme, int line);
   Token(TokenType type, std::string lexeme, std::any literal, int line);
+
+  Token(const Token &);
+  Token &operator=(const Token &);
+
+  Token(Token &&) noexcept;
+  Token &operator=(Token &&) noexcept;
 
   auto getType() const -> TokenType { return type; }
   const std::string &getLexeme() const { return lexeme; }
