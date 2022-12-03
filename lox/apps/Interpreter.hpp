@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Environment.hpp"
 #include "ExprVisitor.hpp"
 #include "StatementVisitor.hpp"
 #include "Token.hpp"
@@ -15,7 +16,10 @@ class Expr;
 
 class Interpreter : public ExprVisitor<std::any>,
                     public StatementVisitor<std::any> {
+  std::unique_ptr<Environment> environment;
+
 public:
+  Interpreter();
   ~Interpreter() = default;
   void execute(const Statement &);
   std::any evaluate(const Expr &);

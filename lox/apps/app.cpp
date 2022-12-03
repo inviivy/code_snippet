@@ -14,6 +14,7 @@
 void runPrompt() {
   fmt::print("welcome to lox\n");
   std::string code;
+  auto interpret = std::make_unique<Lox::Interpreter>();
   while (true) {
     fmt::print("> ");
     if (std::getline(std::cin, code)) {
@@ -27,7 +28,6 @@ void runPrompt() {
         Lox::Lox::HadError = false;
         continue;
       }
-      auto interpret = std::make_unique<Lox::Interpreter>();
       interpret->interpret(exprs);
     } else {
       fmt::print("\n");

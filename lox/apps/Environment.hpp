@@ -14,6 +14,9 @@ class Environment {
 public:
   Environment();
   ~Environment();
+  Environment(const Environment &) = delete;
+  Environment &operator=(const Environment &) = delete;
+
   void define(const std::string &, const std::any &); /* 定义 */
   void assign(const Token &, const std::any &);       /* 赋值 */
   const std::any &getVal(const Token &) const;

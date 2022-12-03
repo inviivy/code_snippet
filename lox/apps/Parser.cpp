@@ -6,6 +6,7 @@
 #include "Lox.hpp"
 #include "PrintStatement.hpp"
 #include "UnaryExpr.hpp"
+#include "VariableExpr.hpp"
 #include "VariableStatement.hpp"
 
 namespace Lox {
@@ -197,7 +198,8 @@ std::unique_ptr<Expr> Parser::primary() {
   }
 
   if (match(TokenType::Identifier)) {
-    /**/
+    /* 返回identifier */
+    return std::make_unique<VariableExpr>(previous());
   }
 
   if (match(TokenType::LeftParen)) {

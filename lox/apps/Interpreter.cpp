@@ -40,6 +40,8 @@ std::string stringify(const std::any &object) {
 
 namespace Lox {
 
+Interpreter::Interpreter() : environment(std::make_unique<Environment>()) {}
+
 void Interpreter::execute(const Statement &expr) { expr.accept(*this); }
 
 void Interpreter::interpret(
@@ -190,8 +192,7 @@ std::any Interpreter::visitLiteralExpr(const LiteralExpr &expr) {
 }
 
 std::any Interpreter::visitVariableExpr(const VariableExpr &expr) {
-  /* todo: how to handle with variable? */
-  return {};
+  return environment->getVal(expr.getVarName());
 }
 
 std::any Interpreter::visitExpressionStmt(const ExpressionStatement &stmt) {
@@ -212,6 +213,9 @@ std::any Interpreter::visitVariableStatement(const VariableStatement &stmt) {
     val = evaluate(*initializer);
   }
   /* update to environment */
+  fmt::print("stmt.getVarName().getLexeme() = {}\n",
+             stmt.getVarName().getLexeme());
+  environment->define(stmt.getVarName().getLexeme(), val);
   return {};
 }
 
