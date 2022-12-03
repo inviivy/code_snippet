@@ -1,4 +1,5 @@
 #include "Parser.hpp"
+#include "AssignExpr.hpp"
 #include "BinaryExpr.hpp"
 #include "ExpressionStatement.hpp"
 #include "GroupingExpr.hpp"
@@ -115,7 +116,27 @@ std::unique_ptr<Statement> Parser::exprStatement() {
   return std::make_unique<ExpressionStatement>(std::move(expr));
 }
 
-std::unique_ptr<Expr> Parser::expression() { return equality(); }
+std::unique_ptr<Expr> Parser::expression() { return assignment(); }
+
+std::unique_ptr<Expr> Parser::assignment() {
+  auto expr = equality();
+  if (match(TokenType::Equal)) {
+    auto equals = previous();
+    auto rightExpr = assignment();
+    /* 如果是等于号, 那么就要判断上下文 */
+    try {
+      if (auto *left = dynamic_cast<VariableExpr *>(expr.get());
+          left != nullptr) {
+        return std::make_unique<AssignExpr>(left->getVarName(),
+                                            std::move(rightExpr));
+      }
+    } catch (std::bad_cast) {
+      error(equals, "Invalid assignment target.");
+    }
+  }
+
+  return expr;
+}
 
 std::unique_ptr<Expr> Parser::equality() {
   // equality        →   comparison ( ( "!=" | "==" ) comparison ) *

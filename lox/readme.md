@@ -27,7 +27,8 @@ varDecl         →   "var" IDENTIFIER ("=" expression) ? ";"
 statement       →   exprStmt | printStmt
 exprStmt        →   expression";"
 printStmt       →   "print" expression ";"
-expression      →   equality
+expression      →   assignment
+assignment      →   IDENTIFIER "=" assignment | equality
 equality        →   comparison ( ( "!=" | "==" ) comparison ) *
 comparison      →   addition ( ( ">" | ">=" | "<" | "<=" ) addition ) *
 addition        →   multiplication ( ( "-" | "+" ) multiplication ) *

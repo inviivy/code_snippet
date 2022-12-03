@@ -34,6 +34,7 @@ private:
   std::unique_ptr<Statement> exprStatement();
   std::unique_ptr<Statement> printStatement();
   std::unique_ptr<Expr> expression();
+  std::unique_ptr<Expr> assignment();
   std::unique_ptr<Expr> equality();
   std::unique_ptr<Expr> comparison();
   std::unique_ptr<Expr> addition();

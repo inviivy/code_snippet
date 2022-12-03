@@ -1,4 +1,5 @@
 #include "Interpreter.hpp"
+#include "AssignExpr.hpp"
 #include "BinaryExpr.hpp"
 #include "Expr.hpp"
 #include "ExpressionStatement.hpp"
@@ -195,6 +196,12 @@ std::any Interpreter::visitVariableExpr(const VariableExpr &expr) {
   return environment->getVal(expr.getVarName());
 }
 
+std::any Interpreter::visitAssignExpr(const AssignExpr &expr) {
+  auto value = evaluate(*expr.getExpr());
+  environment->assign(expr.getVarName(), value);
+  return value;
+}
+
 std::any Interpreter::visitExpressionStmt(const ExpressionStatement &stmt) {
   evaluate(stmt.getExpr());
   return {};
@@ -213,8 +220,6 @@ std::any Interpreter::visitVariableStatement(const VariableStatement &stmt) {
     val = evaluate(*initializer);
   }
   /* update to environment */
-  fmt::print("stmt.getVarName().getLexeme() = {}\n",
-             stmt.getVarName().getLexeme());
   environment->define(stmt.getVarName().getLexeme(), val);
   return {};
 }

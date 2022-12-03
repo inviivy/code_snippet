@@ -20,7 +20,9 @@ SET(LOX_HEADER
     "PrintStatement.hpp"
     "VariableStatement.hpp"
     "VariableExpr.hpp"
-    "Environment.hpp")
+    "Environment.hpp"
+    "AssignExpr.hpp"
+    )
 
 SET(LOX_SOURCE
     "Token.cpp"
@@ -36,7 +38,9 @@ SET(LOX_SOURCE
     "PrintStatement.cpp"
     "VariableStatement.cpp"
     "VariableExpr.cpp"
-    "Environment.cpp")
+    "Environment.cpp"
+    "AssignExpr.cpp"
+    )
 
 add_executable(app app.cpp ${LOX_SOURCE} ${LOX_HEADER})
 target_compile_features(app PRIVATE cxx_std_20)

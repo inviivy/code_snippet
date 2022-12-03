@@ -39,6 +39,7 @@ private:
   std::any visitBinaryExpr(const BinaryExpr &) override;
   std::any visitLiteralExpr(const LiteralExpr &) override;
   std::any visitVariableExpr(const VariableExpr &) override;
+  std::any visitAssignExpr(const AssignExpr &) override;
 
   std::any visitExpressionStmt(const ExpressionStatement &) override;
   std::any visitPrintStatement(const PrintStatement &) override;
