@@ -121,3 +121,50 @@ sudo curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic -XGET https:/
 ### 2.9 集群水平扩展
 当向集群添加更多节点时，它会自动分配分片和副本.
 
+## 第3章 api规范
+http协议&json格式
+
+### 3.1 多索引
+支持跨多个索引&通配符(但是不知道是否支持正则)
+
+### 3.2 日期数学格式
+
+### 3.3 通用选项
+
+#### 3.3.1 格式化搜索结果
+格式化搜索结果
+pretty
+
++ 3.3.2 可读输出
++ 3.3.3 格式化日期值
++ 3.3.4 返回信息过滤
++ 3.3.5 展开设置
++ 3.3.6 布尔值
++ 3.3.7 数字值
++ 3.3.8 时间单位
++ 3.3.9 数据单位
++ 3.3.10 缩略处理
++ 3.3.12 模糊性
++ 3.3.14 查询字符串中的请求正文
++ 3.3.15 Content-Type要求
+
+### 3.4 基于URL的访问控制
+
+## 第4章 操作文档
+
+单文档:
+
++ Index API
++ Get API
++ Delete API
++ Update API
+
+多文档:
+
++ Multi Get API
++ Bulk API
++ Delete By Query API
++ Update By Query API
++ Reindex API
+
+### 4.1 读写文档
