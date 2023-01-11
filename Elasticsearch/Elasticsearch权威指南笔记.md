@@ -92,3 +92,32 @@ sudo curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic -XGET https:/
 + 匹配查询: ```{"match": {"字段": "必须包含的string"}}```
 + 布尔查询：```"bool" : {"must" : [...]}```
 + 聚合查询(group by语义): ```"aggs"```
+
+## 第2章 安装和部署
+
+### 2.2 安装Elasticsearch
+
+调整Linux系统的相关参数设置:
+
++ 修改最大文件数和锁内存限制: /etc/security/limits.conf
++ 更改一个进程能拥有的最大内存区域限制: /etc/sysctl.conf
++ 修改用户最大线程数: /etc/security/limits.d/90-nproc.conf
+
+#### reference
++ [linux-unix系统编程手册第11章]
+
+#### 2.5.5 重要节点发现和集群初始化设置
+
+关于发现应该参考p2p相关的技术?或者分布式技术?
+
+##### 1. 种子列表
+没有任何网络配置的情况下, Elasticsearch将绑定到可用的环回地址, 并扫描本地的端口9300到9305, 以尝试连接到同一服务器上运行的其他节点. 这提供了一种自动组建集群的功能，而无须进行任何配置.
+
+当要与其他主机上的节点组成集群时, 必须使用discovery.seed_hosts设置提供集群中其他节点的列表, 这些节点可以是活动的和可通信的, 以便为发现过程设定种子. 通常形式为host:port.
+
+##### 2. 候选主节点列表
+当第一次启动一个全新的Elasticsearch集群时, 有一个集群引导过程, 它确定在第一次主节点选举中计票的合格主节点集.
+
+### 2.9 集群水平扩展
+当向集群添加更多节点时，它会自动分配分片和副本.
+
