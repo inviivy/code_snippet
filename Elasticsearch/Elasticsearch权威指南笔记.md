@@ -45,3 +45,50 @@ sudo dpkg -i elasticsearch-8.5.3-amd64.deb
 ```
 #### reference
 + [elasticsearch install](https://www.elastic.co/guide/en/elasticsearch/reference/8.5/deb.html#deb-repo)
+
+### 1.3 使用集群
+
++ 检查集群的运行情况: ```sudo curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic -XGET https://localhost:9200/_cat/health?v```, 绿色/黄色/红色
++ 查看节点信息: ```GET /_cat/nodes?v```
++ 查看索引信息: ```GET /_cat/indices?v```
++ 创建索引: ```PUT /customer?v```
++ 添加文档: 
+```
+sudo curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic -XPUT "https://localhost:9200/customer/_doc/1?pretty" -H 'Content-Type: application/json' -d'
+{
+  "name": "John"
+}
+'
+```
++ 搜索文档: ```/GET customer/_doc/1?pretty```
++ 更新or覆盖文档: ```/PUT customer/_doc/1?pretty -H 'Content-Type: application/json' -d'{}'```
++ 批量增加/删除文档
++ 更新文档post
++ 删除文档delete
+
+### 1.4 修改数据
+
+### 1.5 搜索数据
+很多情况下拥有和sql相同的语义.
+
+elasticsearch提供了3个接口:
++ REST api
++ 基于url语义的api: ```?xxA=xxA&xxb=xxb&pretty```
++ 基于json语义的api: GET方法中带一个json的请求语义(本质上是一个DSL)
+
+```
+sudo curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic -XGET https://localhost:9200/customer/_search -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "match_all": {}
+  },
+  "_source": []
+}
+'
+```
+
+#### 查询语义
++ 返回特定字段
++ 匹配查询: ```{"match": {"字段": "必须包含的string"}}```
++ 布尔查询：```"bool" : {"must" : [...]}```
++ 聚合查询(group by语义): ```"aggs"```
