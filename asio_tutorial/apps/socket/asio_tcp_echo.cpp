@@ -2,10 +2,31 @@
 
 #include <array>
 #include <atomic>
+#include <functional>
 #include <iostream>
 #include <memory>
 
 using boost::asio::ip::tcp;
+
+template <typename T>
+struct slot : public std::enable_shared_from_this<slot<T>> {
+  explicit slot(const std::shared_ptr<T> &obj_,
+                std::function<void(const std::shared_ptr<T> &)> func)
+      : weak_(obj_), func_(std::move(func)) {}
+
+  ~slot() {
+    if (func_) [[likely]] {
+      auto obj = weak_.lock();
+      if (obj) {
+        func_(obj);
+      }
+    }
+  }
+
+private:
+  std::weak_ptr<T> weak_;
+  std::function<void(const std::shared_ptr<T> &)> func_;
+};
 
 class session : public std::enable_shared_from_this<session> {
 public:
@@ -111,7 +132,7 @@ private:
 
 private:
   tcp::acceptor acceptor_;
-  boost::asio::signal_set signals_;
+  boost::asio::signal_set signals_; // capture signals
 };
 
 int main() {
