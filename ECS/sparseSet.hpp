@@ -2,26 +2,45 @@
 
 #include <array>
 #include <concepts>
+#include <cstdint>
 #include <limits>
 #include <type_traits>
 #include <vector>
 
 namespace ecs {
 template <typename T, std::size_t PageSize>
-requires(std::is_integral_v<T>)
+requires(std::is_integral_v<T> && std::is_unsigned_v<T>)
 struct SparseSet {
-  void Add(T t) {
-    density_.push_back(t);
-    assure(t);
-    index(t) = density_.size() - 1;
+  SparseSet() {}
+  ~SparseSet() {}
+  SparseSet(const SparseSet &) = delete;
+  SparseSet &operator=(const SparseSet &) = delete;
+
+  SparseSet(SparseSet &&set) noexcept
+      : density_(std::move(set.density_)), sparse_(std::move(set.sparse_)) {}
+
+  SparseSet &operator=(SparseSet &&set) noexcept {
+    density_ = std::move(set.density_);
+    sparse_ = std::move(set.sparse_);
+    return *this;
   }
 
-  // 为了swap&&pop_back
+  void Add(T t) {
+    // 避免重复添加
+    if (Contain(t)) {
+      return;
+    }
+    density_.push_back(t);
+    assure(t);
+    // maybe narrow convert
+    index(t) = static_cast<uint32_t>(density_.size() - 1);
+  }
+
   void Remove(T t) {
     if (!Contain(t))
       return;
     auto &idx = index(t);
-    if (idx == density_.size() - 1) {
+    if (idx == static_cast<uint32_t>(density_.size() - 1)) {
       idx = null;
       density_.pop_back();
     } else {
@@ -40,8 +59,8 @@ struct SparseSet {
   }
 
 private:
-  T &index(T t) { return sparse_[page(t)][offset(t)]; }
-  T index(T t) const { return sparse_[page(t)][offset(t)]; }
+  uint32_t &index(T t) { return sparse_[page(t)][offset(t)]; }
+  uint32_t index(T t) const { return sparse_[page(t)][offset(t)]; }
   std::size_t page(T t) const { return t / PageSize; }
   std::size_t offset(T t) const { return t % PageSize; }
 
@@ -58,7 +77,8 @@ private:
 
 private:
   std::vector<T> density_;
-  std::vector<std::array<T, PageSize>> sparse_;
-  constexpr static T null = std::numeric_limits<T>::max();
+  // 存储的是线性表的下标, 这里使用uint32_t代替
+  std::vector<std::array<uint32_t, PageSize>> sparse_;
+  inline static uint32_t null = std::numeric_limits<uint32_t>::max();
 };
 }; // namespace ecs
