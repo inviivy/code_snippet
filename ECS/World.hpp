@@ -5,8 +5,10 @@
 #include "util.hpp"
 
 #include <cassert>
+#include <concepts>
 #include <cstdint>
 #include <new>
+#include <type_traits>
 #include <unordered_map>
 
 namespace ecs {
@@ -14,9 +16,11 @@ using ComponentTypeID = uint32_t;
 using Entity = uint32_t;
 
 struct Commands;
+struct Resource;
 
 struct World {
   friend class Commands;
+  friend class Resource;
 
   using ComponentMap = std::unordered_map<ComponentTypeID, ComponentTypeInfo>;
   using ComponentContainer = std::unordered_map<ComponentTypeID, void *>;
@@ -141,6 +145,28 @@ private:
     if constexpr (sizeof...(remains) != 0) {
       do_spawn(entity, std::forward<Remains>(remains)...);
     }
+  }
+
+private:
+  World &world_;
+};
+
+struct Resource final {
+  Resource(World &world) : world_(world) {}
+
+  template <typename T>
+  requires(!std::is_reference_v<T> && !std::is_pointer_v<T>) bool
+  Has() const {
+    auto resourceTypeIndex = TypeIndexGetter<World::Resource>::Get<T>();
+    return world_.resources_.find(resourceTypeIndex) != world_.resources_.end();
+  }
+
+  template <typename T>
+  requires(!std::is_reference_v<T> && !std::is_pointer_v<T>)
+  T &Get() {
+    auto resourceTypeIndex = TypeIndexGetter<World::Resource>::Get<T>();
+    // non error handle
+    return *static_cast<T *>(world_.resources_[resourceTypeIndex].source_);
   }
 
 private:
