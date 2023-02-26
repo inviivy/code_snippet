@@ -5,7 +5,8 @@
 #include <type_traits>
 
 namespace ecs {
-// Type map to uint32_t
+
+  template<typename Category>
 struct TypeIndexGetter {
   template <typename T> static uint32_t Get() {
     static uint32_t id = curUniqueIdx_++;

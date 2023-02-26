@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ComponentTypeInfo.hpp"
+#include "ResourceTypeInfo.hpp"
 #include "util.hpp"
 
 #include <cassert>
@@ -36,8 +37,15 @@ struct World {
   }
 
 private:
+  // for category
+  struct Resource {};
+  struct Component {};
+
+private:
   ComponentMap componentMap_;
   std::unordered_map<Entity, ComponentContainer> entities_;
+  /* 一个类型的resource只允许存在一个, 比如Timer，Render等. */
+  std::unordered_map<ComponentTypeID, ResourceTypeInfo> resources_;
 };
 
 struct Commands final {
@@ -63,11 +71,42 @@ struct Commands final {
     return *this;
   }
 
+  template <typename T> Commands &SetResource(T &&resource) {
+    auto resourceTypeIndex = TypeIndexGetter<World::Resource>::Get<T>();
+    if (auto it = world_.resources_.find(resourceTypeIndex);
+        it == world_.resources_.end()) {
+      world_.resources_.emplace(resourceTypeIndex,
+                                ResourceTypeInfo(
+                                    []() -> void * {
+                                      return ::operator new(
+                                          sizeof(std::decay_t<T>));
+                                    },
+                                    [](void *elem) {
+                                      using Type = std::decay_t<T>;
+                                      static_cast<Type *>(elem)->~Type();
+                                      ::operator delete(elem);
+                                    }));
+    }
+
+    ResourceTypeInfo &resourceTypeInfo = world_.resources_[resourceTypeIndex];
+    // 暂时不考虑内存分配失败的情况
+    resourceTypeInfo.source_ = resourceTypeInfo.createFn_();
+    ::new (resourceTypeInfo.source_) std::decay_t<T>(std::forward<T>(resource));
+    return *this;
+  }
+
+  template <typename T> Commands &RemoveResource() {
+    auto resourceTypeIndex = TypeIndexGetter<World::Resource>::Get<T>();
+    world_.resources_.erase(resourceTypeIndex);
+    return *this;
+  }
+
 private:
   template <typename T, typename... Remains>
   void do_spawn(Entity entity, T &&component, Remains &&...remains) {
     // 类型index
-    auto componentTypeIndex = TypeIndexGetter::Get<T>();
+
+    auto componentTypeIndex = TypeIndexGetter<World::Component>::Get<T>();
     if (auto it = world_.componentMap_.find(componentTypeIndex);
         it == world_.componentMap_.end()) {
       // 插入Component的构造和析构函数
