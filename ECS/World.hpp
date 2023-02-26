@@ -5,6 +5,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <new>
 #include <unordered_map>
 
 namespace ecs {
@@ -70,23 +71,32 @@ private:
     if (auto it = world_.componentMap_.find(componentTypeIndex);
         it == world_.componentMap_.end()) {
       // 插入Component的构造和析构函数
-      world_.componentMap_.emplace(
-          componentTypeIndex,
-          ComponentTypeInfo([]() -> void * { return new T; },
-                            [](void *elem) { delete static_cast<T *>(elem); }));
+      world_.componentMap_.emplace(componentTypeIndex,
+                                   ComponentTypeInfo(
+                                       []() -> void * {
+                                         return ::operator new(
+                                             sizeof(std::decay_t<T>));
+                                       },
+                                       [](void *elem) {
+                                         using Type = std::decay_t<T>;
+                                         static_cast<Type *>(elem)->~Type();
+                                         ::operator delete(elem);
+                                       }));
     }
     ComponentTypeInfo &componentTypeInfo =
         world_.componentMap_[componentTypeIndex];
+    // create component object and initial
     void *element = componentTypeInfo.createFn_();
-    *static_cast<T *>(element) = std::forward<T>(component);
+    ::new (element) std::decay_t<T>(std::forward<T>(component));
     componentTypeInfo.sparseSet_.Add(entity);
 
+    // 检查entity是否存在
     if (auto it = world_.entities_.find(entity); it == world_.entities_.end()) {
       auto [componentIt, succ] =
           world_.entities_.emplace(entity, World::ComponentContainer{});
-      componentIt->second[componentTypeIndex] = element;
+      componentIt->second.emplace(componentTypeIndex, element);
     } else {
-      it->second[componentTypeIndex] = element;
+      it->second.emplace(componentTypeIndex, element);
     }
 
     if constexpr (sizeof...(remains) != 0) {
