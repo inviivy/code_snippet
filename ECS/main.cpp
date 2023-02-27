@@ -12,12 +12,13 @@ struct ID {
   int id;
 };
 
+struct Category {};
 void test_util() {
-  std::cout << ecs::TypeIndexGetter::Get<int>() << '\n';
-  std::cout << ecs::TypeIndexGetter::Get<int>() << '\n';
-  std::cout << ecs::TypeIndexGetter::Get<int>() << '\n';
-  std::cout << ecs::TypeIndexGetter::Get<double>() << '\n';
-  std::cout << ecs::TypeIndexGetter::Get<char>() << '\n';
+  std::cout << ecs::TypeIndexGetter<Category>::Get<int>() << '\n';
+  std::cout << ecs::TypeIndexGetter<Category>::Get<int>() << '\n';
+  std::cout << ecs::TypeIndexGetter<Category>::Get<int>() << '\n';
+  std::cout << ecs::TypeIndexGetter<Category>::Get<double>() << '\n';
+  std::cout << ecs::TypeIndexGetter<Category>::Get<char>() << '\n';
   std::cout << "==============\n";
   std::cout << ecs::IdGenerator<uint32_t>::Gen() << '\n';
   std::cout << ecs::IdGenerator<uint32_t>::Gen() << '\n';
@@ -44,9 +45,43 @@ void test_world() {
   ecs::Commands commands(world);
 
   commands.Spawn(Name{"name"}, ID{123});
+  auto name = Name{"name"};
+  name.name = std::string("cccccccccccccccccccccccccccccc");
+  commands.Spawn(name);
+}
+
+struct Timer {
+  int now;
+};
+
+void test_resource() {
+  ecs::World world;
+  ecs::Commands commands(world);
+
+  commands.SetResource(Timer{1});
+  commands.RemoveResource<Timer>();
+}
+
+struct NonType {};
+
+void test_Query() {
+  ecs::World world;
+  ecs::Commands commands(world);
+  ecs::Queryer queryer(world);
+  commands.Spawn<Name>(Name{"abc"})
+      .Spawn<Name>(Name{"def"})
+      .Spawn<Name, ID>(Name{"xyz"}, ID{20});
+  for (auto entity : queryer.Query<Name>()) {
+    std::cout << queryer.Get<Name>(entity).name << '\n';
+  }
+
+  auto entities = queryer.Query<Name, NonType>();
+  std::cout << entities.empty() << '\n';
 }
 
 int main() {
   test_world();
+  test_resource();
+  test_Query();
   return 0;
 }

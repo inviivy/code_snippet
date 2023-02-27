@@ -6,8 +6,7 @@
 
 namespace ecs {
 
-  template<typename Category>
-struct TypeIndexGetter {
+template <typename Category> struct TypeIndexGetter {
   template <typename T> static uint32_t Get() {
     static uint32_t id = curUniqueIdx_++;
     return id;

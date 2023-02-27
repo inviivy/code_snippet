@@ -58,6 +58,10 @@ struct SparseSet {
     return p < sparse_.size() && sparse_[p][o] != null;
   }
 
+  // todo : implement begin() 和 end()
+  auto begin() { return density_.begin(); }
+  auto end() { return density_.end(); }
+
 private:
   uint32_t &index(T t) { return sparse_[page(t)][offset(t)]; }
   uint32_t index(T t) const { return sparse_[page(t)][offset(t)]; }
