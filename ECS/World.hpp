@@ -52,7 +52,8 @@ private:
 private:
   ComponentMap componentMap_;
   std::unordered_map<Entity, ComponentContainer> entities_;
-  /* 一个类型的resource只允许存在一个, 比如Timer，Render等. */
+  /* 一个类型的resource只允许存在一个, 比如Timer，Render等.
+   * ResourceTypeInfo支持raii */
   std::unordered_map<ComponentTypeID, ResourceTypeInfo> resources_;
 };
 
