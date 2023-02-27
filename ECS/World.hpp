@@ -11,8 +11,6 @@
 #include <type_traits>
 #include <unordered_map>
 
-#include <iostream>
-
 namespace ecs {
 using ComponentTypeID = uint32_t;
 using Entity = uint32_t;
@@ -20,6 +18,8 @@ using Entity = uint32_t;
 struct Commands;
 struct Resource;
 struct Queryer;
+
+using StartupSystem = void(*)(Commands, Queryer, Resource);
 
 struct World {
   friend class Commands;
@@ -46,8 +46,8 @@ struct World {
 
 private:
   // for category
-  struct Resource {};
-  struct Component {};
+  struct CategoryResource {};
+  struct CategoryComponent {};
 
 private:
   ComponentMap componentMap_;
@@ -81,7 +81,7 @@ struct Commands final {
   }
 
   template <typename T> Commands &SetResource(T &&resource) {
-    auto resourceTypeIndex = TypeIndexGetter<World::Resource>::Get<T>();
+    auto resourceTypeIndex = TypeIndexGetter<World::CategoryResource>::Get<T>();
     if (auto it = world_.resources_.find(resourceTypeIndex);
         it == world_.resources_.end()) {
       world_.resources_.emplace(resourceTypeIndex,
@@ -105,7 +105,7 @@ struct Commands final {
   }
 
   template <typename T> Commands &RemoveResource() {
-    auto resourceTypeIndex = TypeIndexGetter<World::Resource>::Get<T>();
+    auto resourceTypeIndex = TypeIndexGetter<World::CategoryResource>::Get<T>();
     world_.resources_.erase(resourceTypeIndex);
     return *this;
   }
@@ -115,7 +115,7 @@ private:
   void do_spawn(Entity entity, T &&component, Remains &&...remains) {
     // 类型index
 
-    auto componentTypeIndex = TypeIndexGetter<World::Component>::Get<T>();
+    auto componentTypeIndex = TypeIndexGetter<World::CategoryComponent>::Get<T>();
     if (auto it = world_.componentMap_.find(componentTypeIndex);
         it == world_.componentMap_.end()) {
       // 插入Component的构造和析构函数
@@ -163,14 +163,14 @@ struct Resource final {
   template <typename T>
   requires(!std::is_reference_v<T> && !std::is_pointer_v<T>) bool
   Has() const {
-    auto resourceTypeIndex = TypeIndexGetter<World::Resource>::Get<T>();
+    auto resourceTypeIndex = TypeIndexGetter<World::CategoryResource>::Get<T>();
     return world_.resources_.find(resourceTypeIndex) != world_.resources_.end();
   }
 
   template <typename T>
   requires(!std::is_reference_v<T> && !std::is_pointer_v<T>)
   T &Get() {
-    auto resourceTypeIndex = TypeIndexGetter<World::Resource>::Get<T>();
+    auto resourceTypeIndex = TypeIndexGetter<World::CategoryResource>::Get<T>();
     // non error handle
     return *static_cast<T *>(world_.resources_[resourceTypeIndex].source_);
   }
@@ -196,7 +196,7 @@ struct Queryer final {
   requires(!std::is_reference_v<T> && !std::is_pointer_v<T>) bool
   Has(Entity entity) {
     auto it = world_.entities_.find(entity);
-    auto componentTypeIndex = TypeIndexGetter<World::Component>::Get<T>();
+    auto componentTypeIndex = TypeIndexGetter<World::CategoryComponent>::Get<T>();
     return it != world_.entities_.end() &&
            it->second.find(componentTypeIndex) != it->second.end();
   }
@@ -205,7 +205,7 @@ struct Queryer final {
   template <typename T>
   requires(!std::is_reference_v<T> && !std::is_pointer_v<T>)
   T &Get(Entity entity) {
-    auto componentTypeIndex = TypeIndexGetter<World::Component>::Get<T>();
+    auto componentTypeIndex = TypeIndexGetter<World::CategoryComponent>::Get<T>();
     return *static_cast<T *>(world_.entities_[entity][componentTypeIndex]);
   }
 
@@ -213,7 +213,7 @@ private:
   /* 查找拥有T或同时拥有T1/T2/T3...类型的entity */
   template <typename T, typename... Remains>
   void do_query(std::vector<Entity> &outEntities) {
-    auto componentTypeIndex = TypeIndexGetter<World::Component>::Get<T>();
+    auto componentTypeIndex = TypeIndexGetter<World::CategoryComponent>::Get<T>();
     // componentMap可能不存在对应的type info
     if (auto it = world_.componentMap_.find(componentTypeIndex);
         it != world_.componentMap_.end()) {
@@ -233,7 +233,7 @@ private:
 
   template <typename T, typename... Remains>
   bool isSame(Entity entity, std::vector<Entity> &outEntities) const {
-    auto componentTypeIndex = TypeIndexGetter<World::Component>::Get<T>();
+    auto componentTypeIndex = TypeIndexGetter<World::CategoryComponent>::Get<T>();
     auto &componentContainer = world_.entities_[entity];
     if (auto it = componentContainer.find(componentTypeIndex);
         it == componentContainer.end()) {
