@@ -19,7 +19,7 @@ struct Commands;
 struct Resource;
 struct Queryer;
 
-using StartupSystem = void(*)(Commands, Queryer, Resource);
+using StartupSystem = void (*)(Commands, Queryer, Resource);
 
 struct World {
   friend class Commands;
@@ -115,7 +115,8 @@ private:
   void do_spawn(Entity entity, T &&component, Remains &&...remains) {
     // 类型index
 
-    auto componentTypeIndex = TypeIndexGetter<World::CategoryComponent>::Get<T>();
+    auto componentTypeIndex =
+        TypeIndexGetter<World::CategoryComponent>::Get<T>();
     if (auto it = world_.componentMap_.find(componentTypeIndex);
         it == world_.componentMap_.end()) {
       // 插入Component的构造和析构函数
@@ -196,7 +197,8 @@ struct Queryer final {
   requires(!std::is_reference_v<T> && !std::is_pointer_v<T>) bool
   Has(Entity entity) {
     auto it = world_.entities_.find(entity);
-    auto componentTypeIndex = TypeIndexGetter<World::CategoryComponent>::Get<T>();
+    auto componentTypeIndex =
+        TypeIndexGetter<World::CategoryComponent>::Get<T>();
     return it != world_.entities_.end() &&
            it->second.find(componentTypeIndex) != it->second.end();
   }
@@ -205,7 +207,8 @@ struct Queryer final {
   template <typename T>
   requires(!std::is_reference_v<T> && !std::is_pointer_v<T>)
   T &Get(Entity entity) {
-    auto componentTypeIndex = TypeIndexGetter<World::CategoryComponent>::Get<T>();
+    auto componentTypeIndex =
+        TypeIndexGetter<World::CategoryComponent>::Get<T>();
     return *static_cast<T *>(world_.entities_[entity][componentTypeIndex]);
   }
 
@@ -213,7 +216,8 @@ private:
   /* 查找拥有T或同时拥有T1/T2/T3...类型的entity */
   template <typename T, typename... Remains>
   void do_query(std::vector<Entity> &outEntities) {
-    auto componentTypeIndex = TypeIndexGetter<World::CategoryComponent>::Get<T>();
+    auto componentTypeIndex =
+        TypeIndexGetter<World::CategoryComponent>::Get<T>();
     // componentMap可能不存在对应的type info
     if (auto it = world_.componentMap_.find(componentTypeIndex);
         it != world_.componentMap_.end()) {
@@ -233,7 +237,8 @@ private:
 
   template <typename T, typename... Remains>
   bool isSame(Entity entity, std::vector<Entity> &outEntities) const {
-    auto componentTypeIndex = TypeIndexGetter<World::CategoryComponent>::Get<T>();
+    auto componentTypeIndex =
+        TypeIndexGetter<World::CategoryComponent>::Get<T>();
     auto &componentContainer = world_.entities_[entity];
     if (auto it = componentContainer.find(componentTypeIndex);
         it == componentContainer.end()) {
