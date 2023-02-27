@@ -71,7 +71,7 @@ void test_Query() {
   commands.Spawn<Name>(Name{"abc"})
       .Spawn<Name>(Name{"def"})
       .Spawn<Name, ID>(Name{"xyz"}, ID{20});
-  for (auto entity : queryer.Query<Name>()) {
+  for (auto entity : queryer.Query<Name, ID>()) {
     std::cout << queryer.Get<Name>(entity).name << '\n';
   }
 

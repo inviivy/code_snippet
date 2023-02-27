@@ -181,14 +181,19 @@ private:
 struct Queryer final {
   Queryer(World &world) : world_(world) {}
 
-  template <typename... Components> std::vector<Entity> Query() {
+  template <typename... Components>
+  requires((!std::is_reference_v<Components> &&
+            !std::is_pointer_v<Components>) &&
+           ...)
+  std::vector<Entity> Query() {
     std::vector<Entity> entities;
     do_query<Components...>(entities);
     return entities;
   }
 
-  // requires(!std::is_reference_v<T> && !std::is_pointer_v<T>)
-  template <typename T> bool Has(Entity entity) {
+  template <typename T>
+  requires(!std::is_reference_v<T> && !std::is_pointer_v<T>) bool
+  Has(Entity entity) {
     auto it = world_.entities_.find(entity);
     auto componentTypeIndex = TypeIndexGetter<World::Component>::Get<T>();
     return it != world_.entities_.end() &&
@@ -196,7 +201,9 @@ struct Queryer final {
   }
 
   // 先Has再Get
-  template <typename T> T &Get(Entity entity) {
+  template <typename T>
+  requires(!std::is_reference_v<T> && !std::is_pointer_v<T>)
+  T &Get(Entity entity) {
     auto componentTypeIndex = TypeIndexGetter<World::Component>::Get<T>();
     return *static_cast<T *>(world_.entities_[entity][componentTypeIndex]);
   }
