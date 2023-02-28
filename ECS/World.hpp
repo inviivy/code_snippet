@@ -7,7 +7,9 @@
 #include <cassert>
 #include <concepts>
 #include <cstdint>
+#include <functional>
 #include <new>
+#include <optional>
 #include <type_traits>
 #include <unordered_map>
 
@@ -18,8 +20,89 @@ using Entity = uint32_t;
 struct Commands;
 struct Resource;
 struct Queryer;
+struct Events;
 
-using UpdateSystem = void (*)(Commands, Queryer, Resource);
+template <typename T> struct EventStaging final {
+  static bool Has() { return data_.has_value(); }
+
+  static void Set(const T &t) { data_ = t; }
+
+  static T &Get() { return data_.value(); }
+
+  static void Clear() { data_ = std::nullopt; }
+
+private:
+  inline static std::optional<T> data_ = std::nullopt;
+};
+
+// Event的作用是在各个system中传递数据
+// n Reader : 1 EventStaging<T>
+template <typename T> struct EventReader final {
+  bool Has() { return EventStaging<T>::Has(); }
+  T Read() { return EventStaging<T>::Get(); }
+};
+
+// n writter : 1 EventStaging<T>
+// 也就是说, 各个system在每一帧只能有一个T类型的write,
+// 如果需要在一帧中传递多个event 则需要使用不同的Type传递, 否则数据直接覆盖,
+// 只有最后调用的哪个write生效. 实现上是: 当前帧(loop)write
+// data，下一帧其他system read data 如果其它系统忽略了数据,
+// 那么下下帧这个数据会被清除
+template <typename T> struct EventWriter {
+  EventWriter(Events &event) : events_(event) {}
+
+  void Write(const T &);
+
+private:
+  Events &events_;
+};
+
+struct Events final {
+
+  friend struct World;
+
+  template <typename T> friend struct EventWriter;
+
+  template <typename T> auto Reader() { return EventReader<T>{}; }
+  template <typename T> auto Writer() { return EventWriter<T>{*this}; }
+
+private:
+  void addAllEvents() {
+    for (auto &func : addEventFuncs_) {
+      func();
+    }
+    addEventFuncs_.clear();
+  }
+
+  void removeOldEvents() {
+    for (auto &func : removeOldEventFuncs_) {
+      func();
+    }
+    removeOldEventFuncs_.swap(removeEventFuncs_);
+    removeEventFuncs_.clear();
+  }
+
+private:
+  /* 这里的设计思路是: 当我们添加一个事件时, 我们需要额外添加事件结束后的动作,
+   * 所以增加了两个std::vector<void(*)()> */
+  std::vector<void (*)()> removeEventFuncs_;
+  // 每一帧执行时需要将上一帧的事件全部清除掉, 即执行析构等相关操作
+  // 本质上就是解决 当前帧要析构上一帧的事件 的问题
+  std::vector<void (*)()> removeOldEventFuncs_;
+  // 将要添加的事件抽象为一个带状态的function, 然后执行function才真正添加成功,
+  // 每一帧执行一次
+  std::vector<std::function<void()>> addEventFuncs_;
+};
+
+template <typename T> void EventWriter<T>::Write(const T &t) {
+  // 其实就是添加了一个创建对象的functor
+  events_.addEventFuncs_.push_back([=]() { EventStaging<T>::Set(t); });
+
+  // 添加一个删除(之前创建的对象)的functor
+  events_.removeEventFuncs_.push_back([]() { EventStaging<T>::Clear(); });
+};
+
+using UpdateSystem = void (*)(Commands, Queryer, Resource, Events &);
 using StartupSystem = void (*)(Commands);
 
 struct World {
@@ -79,6 +162,7 @@ private:
   std::unordered_map<ComponentTypeID, ResourceTypeInfo> resources_;
   std::vector<StartupSystem> startupSystems_;
   std::vector<UpdateSystem> updateSystems_;
+  Events events_;
 };
 
 struct Commands final {
@@ -294,8 +378,10 @@ inline void World::Startup() {
 
 inline void World::Update() {
   for (auto &sys : updateSystems_) {
-    sys(Commands{*this}, Queryer{*this}, Resource{*this});
+    sys(Commands{*this}, Queryer{*this}, Resource{*this}, events_);
   }
+  events_.removeOldEvents();
+  events_.addAllEvents();
 }
 
 }; // namespace ecs

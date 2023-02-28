@@ -84,22 +84,36 @@ void StartUpSystem(ecs::Commands command) {
 }
 
 void EchoNameSystem(ecs::Commands command, ecs::Queryer query,
-                    ecs::Resource resource) {
+                    ecs::Resource resource, ecs::Events &event) {
   std::cout << "echo name system\n";
-  std::vector<ecs::Entity> entities = query.Query<Name>();
+  std::vector<ecs::Entity> entities = query.Query<Name, ID>();
   for (auto entity : entities) {
-    std::cout << query.Get<Name>(entity).name << '\n';
+    std::cout << query.Get<Name>(entity).name << ", "
+              << query.Get<ID>(entity).id << '\n';
+  }
+
+  event.Writer<std::string>().Write(std::string("first message..............."));
+}
+
+void RecvMessageSystem(ecs::Commands command, ecs::Queryer query,
+                       ecs::Resource resource, ecs::Events &event) {
+  std::cout << "recv message system\n";
+  if (event.Reader<std::string>().Has()) {
+    std::cout << "recv: " << event.Reader<std::string>().Read() << "\n";
   }
 }
 
 void test_system() {
   std::cout << "===========>\n";
   ecs::World world;
-  world.AddStartupSystem(StartUpSystem);
-  world.AddSystem(EchoNameSystem);
-  world.SetResource(Timer{1});
+  world.SetResource(Timer{1})
+      .AddStartupSystem(StartUpSystem)
+      .AddSystem(EchoNameSystem)
+      .AddSystem(RecvMessageSystem);
   world.Startup();
   world.Update();
+  // 模拟第二帧
+  // world.Update();
 }
 
 int main() {
