@@ -19,7 +19,8 @@ struct Commands;
 struct Resource;
 struct Queryer;
 
-using StartupSystem = void (*)(Commands, Queryer, Resource);
+using UpdateSystem = void (*)(Commands, Queryer, Resource);
+using StartupSystem = void (*)(Commands);
 
 struct World {
   friend class Commands;
@@ -34,7 +35,26 @@ struct World {
   World(const World &) = delete;
   World &operator=(const World &) = delete;
 
-  ~World() {
+  ~World() { Shutdown(); }
+
+  World &AddStartupSystem(StartupSystem startupSystem) {
+    startupSystems_.push_back(startupSystem);
+    return *this;
+  }
+
+  World &AddSystem(UpdateSystem updateSystem) {
+    updateSystems_.push_back(updateSystem);
+    return *this;
+  }
+
+  template <typename T> World &SetResource(T &&resource);
+
+  void Startup();
+  void Update();
+  // raii就行
+  void Shutdown() {
+    resources_.clear();
+
     for (auto &[_, componentContainer] : entities_) {
       for (auto &[componentTypeId, ptr] : componentContainer) {
         assert(ptr != nullptr);
@@ -42,6 +62,8 @@ struct World {
       }
     }
     entities_.clear();
+
+    componentMap_.clear();
   }
 
 private:
@@ -55,6 +77,8 @@ private:
   /* 一个类型的resource只允许存在一个, 比如Timer，Render等.
    * ResourceTypeInfo支持raii */
   std::unordered_map<ComponentTypeID, ResourceTypeInfo> resources_;
+  std::vector<StartupSystem> startupSystems_;
+  std::vector<UpdateSystem> updateSystems_;
 };
 
 struct Commands final {
@@ -255,4 +279,23 @@ private:
 private:
   World &world_;
 };
+
+template <typename T> World &World::SetResource(T &&resource) {
+  Commands command(*this);
+  command.SetResource(std::forward<T>(resource));
+  return *this;
+}
+
+inline void World::Startup() {
+  for (auto &sys : startupSystems_) {
+    sys(Commands{*this});
+  }
+}
+
+inline void World::Update() {
+  for (auto &sys : updateSystems_) {
+    sys(Commands{*this}, Queryer{*this}, Resource{*this});
+  }
+}
+
 }; // namespace ecs
