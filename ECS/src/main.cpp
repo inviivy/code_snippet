@@ -114,7 +114,7 @@ void test_system() {
   world.Startup();
   world.Update();
   // 模拟第二帧
-  // world.Update();
+  world.Update();
 }
 
 int main() {
