@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+namespace ecs {
+
 /* Resource满足RAII */
 struct ResourceTypeInfo {
   using CreateFunc = void *(*)();
@@ -39,3 +41,5 @@ struct ResourceTypeInfo {
     return *this;
   }
 };
+
+}; // namespace ecs
