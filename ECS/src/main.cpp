@@ -92,7 +92,8 @@ void EchoNameSystem(ecs::Commands command, ecs::Queryer query,
               << query.Get<ID>(entity).id << '\n';
   }
 
-  event.Writer<std::string>().Write(std::string("first message..............."));
+  event.Writer<std::string>().Write(
+      std::string("first message..............."));
 }
 
 void RecvMessageSystem(ecs::Commands command, ecs::Queryer query,
