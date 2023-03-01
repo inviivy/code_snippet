@@ -51,7 +51,7 @@ template <typename T> struct EventReader final {
 template <typename T> struct EventWriter {
   EventWriter(Events &event) : events_(event) {}
 
-  void Write(const T &);
+  void Write(T &&);
 
 private:
   Events &events_;
@@ -94,9 +94,10 @@ private:
   std::vector<std::function<void()>> addEventFuncs_;
 };
 
-template <typename T> void EventWriter<T>::Write(const T &t) {
+template <typename T> void EventWriter<T>::Write(T &&t) {
   // 其实就是添加了一个创建对象的functor
-  events_.addEventFuncs_.push_back([=]() { EventStaging<T>::Set(t); });
+  events_.addEventFuncs_.push_back(
+      [t = std::forward<T>(t)]() { EventStaging<T>::Set(t); });
 
   // 添加一个删除(之前创建的对象)的functor
   events_.removeEventFuncs_.push_back([]() { EventStaging<T>::Clear(); });
