@@ -82,6 +82,8 @@ perf script > out.perf && ./FlameGraph/stackcollapse-perf.pl out.perf > out.fold
 
 int n;
 
+// http://0x80.pl/
+
 int main()
 {
     std::string str("abc----------------------------\r\n");
